@@ -139,7 +139,7 @@ int main() {
     while (true) {
         cout << "Choose your role: ";
         cin >> role;
-        cin.ignore(); 
+        cin.ignore();
 
         if (role == 1) {
             string fullname;
@@ -156,8 +156,29 @@ int main() {
             }
         }
         else if (role == 2) {
+            char choice0;
+            cout << "Add new student(Y|N)?: ";
+            cin >> choice0;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            if (choice0 == 'Y' || choice0 == 'y') {
+                string name;
+                cout << "Enter student name: ";
+                getline(cin, name);
+
+                vector<float> grades;
+                cout << "Enter grades (space-separated): ";
+                float grade;
+                while (cin >> grade) {
+                    grades.push_back(grade);
+                    if (cin.peek() == '\n') break;
+                }
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                t.addStudent(student(name, grades));
+            }
+
             string fullname;
-            cout << "Enter student`s name: ";
+            cout << "Enter existing student`s name: ";
             getline(cin, fullname);
 
             student* stud = t.getStudentByName(fullname);
@@ -167,71 +188,51 @@ int main() {
                 t.getStudentInfo(*stud);
                 t.getAbsence(*stud);
 
-				char choice0;
-                cout << "Add new student(Y|N)?: ";
-				if (cin >> choice0) {
-					if (choice0 == 'Y' || choice0 == 'y') {
-						string name;
-						cout << "Enter student name: ";
-						cin.ignore();
-						getline(cin, name);
-						vector<float> grades;
-						cout << "Enter grades (space-separated): ";
-						float grade;
-						while (cin >> grade) {
-							grades.push_back(grade);
-							if (cin.peek() == '\n') break; 
-						}
-						t.addStudent(student(name, grades));
-					}
-				}
-
                 string choice;
-                cout << "Select what to change( grades|absence ): ";
-				cin >> choice;
+                cout << "Select what to change (grades|absence): ";
+                cin >> choice;
 
                 if (choice == "grades") {
-                    cout << "Want to change or add grades?";
+                    cout << "Want to change or add grades? ";
+                    string choice2;
+                    cin >> choice2;
 
-					string choice2;
-					cin >> choice2;
+                    if (choice2 == "add") {
+                        float newGrade;
+                        cout << "Enter new grade: ";
+                        cin >> newGrade;
+                        t.addGrade(*stud, newGrade);
+                    }
+                    else if (choice2 == "change") {
+                        cout << "Enter new grades (space-separated): ";
+                        vector<float> newGrades;
+                        float grade;
+                        while (cin >> grade) {
+                            newGrades.push_back(grade);
+                            if (cin.peek() == '\n') break;
+                        }
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        t.setStudentGrades(*stud, newGrades);
+                    }
+                }
+                else if (choice == "absence") {
+                    int day, year;
+                    string month;
+                    cout << "Enter absence date (day): ";
+                    cin >> day;
+                    cout << "Enter absence date (month): ";
+                    cin >> month;
+                    cout << "Enter absence date (year): ";
+                    cin >> year;
 
-					if (choice2 == "add") {
-						float newGrade;
-						cout << "Enter new grade: ";
-						cin >> newGrade;
-						t.addGrade(*stud, newGrade);
-					}
-
-					else if (choice2 == "change") {
-						cout << "Enter new grades (space-separated): ";
-						vector<float> newGrades;
-						for (int i = 0; i < sizeof(newGrades); i++)
-						{
-							cin >> newGrades[i];
-						}
-						t.setStudentGrades(*stud, newGrades);
-					}
-				}
-				else if (choice == "absence") {
-					cout << "Enter absence date (day): ";
-					int day;
-					cin >> day;
-
-					cout << "Enter absence date (month): ";
-					string month;
-					cin >> month;
-
-					cout << "Enter absence date (year): ";
-					int year;
-					cin >> year;
-
-					t.addAbsence(*stud, day, month, year);
-				}
-				
-            } else { cout << "Student not found"; }
-			
+                    t.addAbsence(*stud, day, month, year);
+                }
+            }
+            else {
+                cout << "Student not found!" << endl;
+            }
         }
+
         else if (role == 3) {
             cout << "Exiting..." << endl;
             break;
