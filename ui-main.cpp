@@ -25,6 +25,8 @@ int main() {
     string currentStudentName;
     bool hasPerformance = false;
 
+    vector<pair<string, int>> performanceRecords;
+
     while (true) {
         if (currentStudentName.empty()) {
             cout << "Enter student name to work with: ";
@@ -53,7 +55,7 @@ int main() {
             cin.ignore();
 
             string dateStr;
-            cout << "Enter date (YYYY-MM-DD): ";
+            cout << "Enter date (DD-MM-YYYY): ";
             getline(cin, dateStr);
 
             bool isPresent = (presentInput == 1);
@@ -73,6 +75,7 @@ int main() {
             bool added = false;
             while (iss >> grade) {
                 journal.addEntry(make_unique<Performance>(currentStudent, grade));
+                performanceRecords.push_back({ currentStudentName, grade });
                 added = true;
             }
             if (added) {
@@ -84,24 +87,48 @@ int main() {
             cout << "\n--- All Entries for " << currentStudentName << " ---\n";
 
             cout << "Attendance:\n";
-            bool hasAttendance = false;
+            vector<string> presentDates;
+            vector<string> absentDates;
             for (const auto& rec : attendanceRecords) {
                 if (rec.studentName == currentStudentName) {
-                    cout << rec.date << ": " << (rec.isPresent ? "Present" : "Absent") << '\n';
-                    hasAttendance = true;
+                    (rec.isPresent ? presentDates : absentDates).push_back(rec.date);
                 }
             }
-            if (!hasAttendance) {
+
+            cout << "Absent:\n";
+            if (absentDates.empty()) {
                 cout << "-\n";
+            }
+            else {
+                for (const auto& date : absentDates) {
+                    cout << date << '\n';
+                }
+            }
+
+            cout << "Present:\n";
+            if (presentDates.empty()) {
+                cout << "-\n";
+            }
+            else {
+                for (const auto& date : presentDates) {
+                    cout << date << '\n';
+                }
             }
 
             cout << "\nPerformance:\n";
-            if (hasPerformance) {
-                journal.printAll();
+            bool foundGrades = false;
+            for (const auto& p : performanceRecords) {
+                if (p.first == currentStudentName) {
+                    if (foundGrades) cout << ' ';
+                    cout << p.second;
+                    foundGrades = true;
+                }
             }
-            else {
-                cout << "-\n";
+            if (!foundGrades) {
+                cout << "-";
             }
+            cout << '\n';
+
             break;
         }
         case 4: {
