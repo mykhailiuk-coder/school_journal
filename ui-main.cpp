@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <sstream>
 #include "Journal.h"
 #include "Performance.h"
 #include "Attendance.h"
@@ -22,6 +23,7 @@ int main() {
 
     int choice = -1;
     string currentStudentName;
+    bool hasPerformance = false;
 
     while (true) {
         if (currentStudentName.empty()) {
@@ -30,11 +32,12 @@ int main() {
             if (find(students.begin(), students.end(), currentStudentName) == students.end()) {
                 students.push_back(currentStudentName);
             }
+            hasPerformance = false;
         }
 
         cout << "\n=== Journal Menu for " << currentStudentName << " ===\n";
         cout << "1. Add Attendance\n";
-        cout << "2. Add Performance\n";
+        cout << "2. Add Performance (multiple grades allowed)\n";
         cout << "3. Show All Entries\n";
         cout << "4. Switch Student\n";
         cout << "0. Exit\n";
@@ -61,30 +64,44 @@ int main() {
             break;
         }
         case 2: {
+            cout << "Enter grades separated by spaces: ";
+            string line;
+            getline(cin, line);
+            istringstream iss(line);
             int grade;
-            cout << "Enter grade: ";
-            cin >> grade;
-            cin.ignore();
-
             Student currentStudent(0, currentStudentName);
-            journal.addEntry(make_unique<Performance>(currentStudent, grade));
+            bool added = false;
+            while (iss >> grade) {
+                journal.addEntry(make_unique<Performance>(currentStudent, grade));
+                added = true;
+            }
+            if (added) {
+                hasPerformance = true;
+            }
             break;
         }
         case 3: {
             cout << "\n--- All Entries for " << currentStudentName << " ---\n";
 
-           
             cout << "Attendance:\n";
+            bool hasAttendance = false;
             for (const auto& rec : attendanceRecords) {
                 if (rec.studentName == currentStudentName) {
                     cout << rec.date << ": " << (rec.isPresent ? "Present" : "Absent") << '\n';
+                    hasAttendance = true;
                 }
+            }
+            if (!hasAttendance) {
+                cout << "-\n";
             }
 
             cout << "\nPerformance:\n";
-
-            journal.printAll();
-
+            if (hasPerformance) {
+                journal.printAll();
+            }
+            else {
+                cout << "-\n";
+            }
             break;
         }
         case 4: {
@@ -98,6 +115,7 @@ int main() {
             cin.ignore();
             if (num >= 1 && num <= (int)students.size()) {
                 currentStudentName = students[num - 1];
+                hasPerformance = false;
             }
             else {
                 cout << "Invalid number\n";
