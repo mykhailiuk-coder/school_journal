@@ -2,6 +2,8 @@
 #pragma once
 #include "JournalEntry.h"
 
+using namespace std;
+
 class Attendance : public JournalEntry {
     bool isPresent;
 public:
