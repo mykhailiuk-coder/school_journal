@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include "Journal.h"
 #include "Performance.h"
 #include "Attendance.h"
@@ -17,19 +18,25 @@ struct AttendanceRecord {
 int main() {
     Journal journal;
     vector<AttendanceRecord> attendanceRecords;
+    vector<string> students;
 
-    cout << "Enter student name to work with: ";
+    int choice = -1;
     string currentStudentName;
-    getline(cin, currentStudentName);
-    Student currentStudent(0, currentStudentName);
 
-    int choice;
-    do {
+    while (true) {
+        if (currentStudentName.empty()) {
+            cout << "Enter student name to work with: ";
+            getline(cin, currentStudentName);
+            if (find(students.begin(), students.end(), currentStudentName) == students.end()) {
+                students.push_back(currentStudentName);
+            }
+        }
+
         cout << "\n=== Journal Menu for " << currentStudentName << " ===\n";
         cout << "1. Add Attendance\n";
         cout << "2. Add Performance\n";
-        cout << "3. Show Entries for " << currentStudentName << "\n";
-        cout << "4. Show Attendance Summary for " << currentStudentName << "\n";
+        cout << "3. Show All Entries\n";
+        cout << "4. Switch Student\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -48,6 +55,7 @@ int main() {
 
             bool isPresent = (presentInput == 1);
 
+            Student currentStudent(0, currentStudentName);
             journal.addEntry(make_unique<Attendance>(currentStudent, isPresent));
             attendanceRecords.push_back({ currentStudentName, dateStr, isPresent });
             break;
@@ -58,42 +66,49 @@ int main() {
             cin >> grade;
             cin.ignore();
 
+            Student currentStudent(0, currentStudentName);
             journal.addEntry(make_unique<Performance>(currentStudent, grade));
             break;
         }
         case 3: {
-            cout << "\n--- Entries for " << currentStudentName << " ---\n";
+            cout << "\n--- All Entries for " << currentStudentName << " ---\n";
 
-            cout << "\nAttendance records:\n";
+           
+            cout << "Attendance:\n";
             for (const auto& rec : attendanceRecords) {
                 if (rec.studentName == currentStudentName) {
-                    cout << rec.date << ": " << (rec.isPresent ? "Present" : "Absent") << "\n";
+                    cout << rec.date << ": " << (rec.isPresent ? "Present" : "Absent") << '\n';
                 }
             }
+
+            cout << "\nPerformance:\n";
+
+            journal.printAll();
 
             break;
         }
         case 4: {
-            int presentCount = 0, absentCount = 0;
-            for (const auto& rec : attendanceRecords) {
-                if (rec.studentName == currentStudentName) {
-                    rec.isPresent ? presentCount++ : absentCount++;
-                }
+            cout << "Available students:\n";
+            for (size_t i = 0; i < students.size(); ++i) {
+                cout << i + 1 << ". " << students[i] << '\n';
             }
-
-            cout << "\nAttendance summary for " << currentStudentName << ":\n";
-            cout << "Present days: " << presentCount << "\n";
-            cout << "Absent days: " << absentCount << "\n";
+            cout << "Enter student number to switch: ";
+            int num;
+            cin >> num;
+            cin.ignore();
+            if (num >= 1 && num <= (int)students.size()) {
+                currentStudentName = students[num - 1];
+            }
+            else {
+                cout << "Invalid number\n";
+            }
             break;
         }
         case 0:
             cout << "Exiting...\n";
-            break;
+            return 0;
         default:
             cout << "Invalid choice.\n";
         }
-
-    } while (choice != 0);
-
-    return 0;
+    }
 }
