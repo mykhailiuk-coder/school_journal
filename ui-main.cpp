@@ -124,6 +124,20 @@ int main() {
                     foundGrades = true;
                 }
             }
+            cout << "\nAverage grade:";
+			if (foundGrades) {
+				double sum = 0;
+				for (const auto& p : performanceRecords) {
+					if (p.first == currentStudentName) {
+						sum += p.second;
+					}
+				}
+				cout << " " << sum / count_if(performanceRecords.begin(), performanceRecords.end(),
+					[&currentStudentName](const pair<string, int>& p) { return p.first == currentStudentName; });
+			}
+			else {
+				cout << " -";
+			}
             if (!foundGrades) {
                 cout << "-";
             }
